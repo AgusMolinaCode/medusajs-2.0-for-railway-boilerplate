@@ -21,27 +21,19 @@ const regionMap = new Map<string, HttpTypes.StoreRegion>()
 
 export const getRegion = cache(async function (countryCode: string) {
   try {
-    if (regionMap.has(countryCode)) {
-      return regionMap.get(countryCode)
-    }
-
+    // Always force Argentina region
     const regions = await listRegions()
 
     if (!regions) {
       return null
     }
 
-    regions.forEach((region) => {
-      region.countries?.forEach((c) => {
-        regionMap.set(c?.iso_2 ?? "", region)
-      })
-    })
+    // Find Argentina region specifically
+    const argentinaRegion = regions.find(region => 
+      region.countries?.some(country => country.iso_2 === "ar")
+    )
 
-    const region = countryCode
-      ? regionMap.get(countryCode)
-      : regionMap.get("us")
-
-    return region
+    return argentinaRegion || null
   } catch (e: any) {
     return null
   }
